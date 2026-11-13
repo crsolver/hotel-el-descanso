@@ -1,0 +1,67 @@
+---
+import Icon from './Icon.astro';
+import { hotels } from '../data/hotel';
+import { ui } from '../data/ui';
+import { localeFromPath, routes } from '../lib/i18n';
+
+const locale = localeFromPath(Astro.url.pathname);
+const hotel = hotels[locale];
+const copy = ui[locale];
+const r = routes[locale];
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <a class="brand" href={r.home}>
+          <span class="brand__mark"><Icon name="tour" /></span>
+          <span class="brand__text">
+            <span class="brand__name">{hotel.name}</span>
+            <span class="brand__meta">{copy.brandMeta}</span>
+          </span>
+        </a>
+        <p class="footer-about">{hotel.description}</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>{copy.footer.contact}</h4>
+        <ul>
+          <li><a href={`tel:${hotel.contact.phoneHref}`}>{hotel.contact.phone}</a></li>
+          <li><a href={`mailto:${hotel.contact.email}`}>{hotel.contact.email}</a></li>
+          <li><a href={`https://wa.me/${hotel.contact.whatsapp}`}>WhatsApp</a></li>
+          <li>{hotel.contact.address}</li>
+          <li>{hotel.contact.city}</li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>{copy.footer.hotel}</h4>
+        <ul>
+          <li><a href={`${r.home}#habitaciones`}>{copy.nav.rooms}</a></li>
+          <li><a href={`${r.home}#servicios`}>{copy.nav.amenities}</a></li>
+          <li><a href={`${r.home}#ubicacion`}>{copy.nav.location}</a></li>
+          <li><a href={`${r.home}#reservar`}>{copy.cta.book}</a></li>
+          {
+            hotel.contact.social.map((social) => (
+              <li>
+                <a href={social.href} target="_blank" rel="noopener noreferrer">
+                  {social.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© {year} {hotel.legalName}. {copy.footer.rights}</p>
+      <p>
+        {copy.labels.checkIn} {hotel.checkIn} · {copy.labels.checkOut} {hotel.checkOut} · {copy.labels.from} {hotel.currency} {hotel.priceFrom}
+      </p>
+    </div>
+  </div>
+</footer>

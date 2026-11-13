@@ -1,0 +1,232 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import WhatsAppFab from '../components/WhatsAppFab.astro';
+import { hotels } from '../data/hotel';
+import { ui } from '../data/ui';
+import { altPath, localeFromPath, type Locale } from '../lib/i18n';
+
+interface Props {
+  /** Título de la página (sin el nombre del hotel). */
+  title?: string;
+  description?: string;
+  /** true en páginas internas: header sólido y espacio superior. */
+  solidHeader?: boolean;
+  noindex?: boolean;
+  /** Datos estructurados adicionales (se suman al Hotel). */
+  jsonLd?: Record<string, unknown>;
+}
+
+const locale = localeFromPath(Astro.url.pathname) as Locale;
+const hotel = hotels[locale];
+const copy = ui[locale];
+
+const { title, description = hotel.seo.description, solidHeader = false, noindex = false, jsonLd } =
+  Astro.props;
+
+const pageTitle = title ? `${title} | ${hotel.name}` : `${hotel.name} — ${hotel.tagline}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = hotel.seo.image ? new URL(hotel.seo.image, Astro.site).toString() : undefined;
+
+const esUrl = new URL(altPath(Astro.url.pathname, 'es'), Astro.site);
+const enUrl = new URL(altPath(Astro.url.pathname, 'en'), Astro.site);
+
+const hotelSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Hotel',
+  '@id': new URL('/#hotel', Astro.site).toString(),
+  name: hotel.name,
+  legalName: hotel.legalName,
+  description: hotel.description,
+  url: canonical.toString(),
+  inLanguage: locale,
+  telephone: hotel.contact.phoneHref,
+  email: hotel.contact.email,
+  priceRange: `${hotel.currency} ${hotel.priceFrom}+`,
+  currenciesAccepted: hotel.currency,
+  checkinTime: hotel.checkIn,
+  checkoutTime: hotel.checkOut,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: hotel.contact.address,
+    addressLocality: 'San Isidro de El General',
+    addressRegion: 'San José',
+    addressCountry: 'CR',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: hotel.contact.coords.lat,
+    longitude: hotel.contact.coords.lng,
+  },
+  sameAs: hotel.contact.social.map((social) => social.href),
+  ...(ogImage ? { image: ogImage } : {}),
+  amenityFeature: hotel.amenities.map((amenity) => ({
+    '@type': 'LocationFeatureSpecification',
+    name: amenity.title,
+    value: true,
+  })),
+};
+
+const schema = jsonLd
+  ? { '@context': 'https://schema.org', '@graph': [hotelSchema, jsonLd] }
+  : hotelSchema;
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="es" href={esUrl} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="x-default" href={esUrl} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content="#191f1a" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={hotel.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={locale === 'en' ? 'en_US' : 'es_CR'} />
+    <meta property="og:locale:alternate" content={locale === 'en' ? 'es_CR' : 'en_US'} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+  </head>
+  <body>
+    <a
+      href="#contenido"
+      class="skip-link"
+      onfocus="this.style.transform='translateY(0)'"
+      onblur="this.style.transform='translateY(-150%)'">{copy.aria.skip}</a
+    >
+
+    <Header solid={solidHeader} />
+
+    <main id="contenido">
+      <slot />
+    </main>
+
+    <Footer />
+    <WhatsAppFab />
+
+    <script is:inline>
+      // Header: fondo sólido al hacer scroll (solo en la portada) + menú móvil.
+      document.addEventListener('DOMContentLoaded', () => {
+        const header = document.querySelector('.site-header');
+        if (!header) return;
+
+        const onScroll = () => {
+          if (header.dataset.static === 'true') return;
+          header.classList.toggle('is-solid', window.scrollY > 40);
+        };
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+
+        const toggle = header.querySelector('.nav-toggle');
+        toggle?.addEventListener('click', () => {
+          const open = header.dataset.open === 'true';
+          header.dataset.open = String(!open);
+          toggle.setAttribute('aria-expanded', String(!open));
+        });
+
+        document.querySelectorAll('.mobile-nav a').forEach((link) => {
+          link.addEventListener('click', () => {
+            header.dataset.open = 'false';
+            toggle?.setAttribute('aria-expanded', 'false');
+          });
+        });
+
+        // El botón de WhatsApp aparece al bajar, para no tapar la barra de reserva.
+        const fab = document.querySelector('.wa-fab');
+        if (fab) {
+          const toggleFab = () => fab.classList.toggle('is-visible', window.scrollY > 420);
+          toggleFab();
+          window.addEventListener('scroll', toggleFab, { passive: true });
+        }
+      });
+    </script>
+
+    <script
+      is:inline
+      define:vars={{
+        waLabels: copy.waLabels,
+        waSent: copy.waSent,
+        dateLocale: locale === 'en' ? 'en-US' : 'es-CR',
+      }}
+    >
+      // Formularios que arman un mensaje y abren WhatsApp (sin backend).
+      document.addEventListener('DOMContentLoaded', () => {
+        const fmt = (value) => {
+          if (!value) return '';
+          const d = new Date(value + 'T12:00:00');
+          return d.toLocaleDateString(dateLocale, { day: '2-digit', month: 'long', year: 'numeric' });
+        };
+
+        const syncDates = (form) => {
+          const arrival = form.querySelector('[name="llegada"]');
+          const departure = form.querySelector('[name="salida"]');
+          if (!arrival || !departure) return;
+          const today = new Date();
+          const iso = today.toISOString().split('T')[0];
+          arrival.min = iso;
+          const setDepartureMin = () => {
+            if (arrival.value) {
+              departure.min = arrival.value;
+              if (departure.value && departure.value < arrival.value) departure.value = '';
+            }
+          };
+          setDepartureMin();
+          arrival.addEventListener('change', setDepartureMin);
+        };
+
+        document.querySelectorAll('form[data-wa-form]').forEach((form) => {
+          syncDates(form);
+          form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const wa = form.dataset.wa;
+            const hotelName = form.dataset.hotel || '';
+            if (!wa) return;
+
+            const data = new FormData(form);
+            const lines = [];
+            lines.push(form.dataset.intro || '');
+            lines.push('');
+
+            for (const [name, label] of Object.entries(waLabels)) {
+              let value = String(data.get(name) || '').trim();
+              if (!value) continue;
+              if (name === 'llegada' || name === 'salida') value = fmt(value);
+              lines.push(`${label}: ${value}`);
+            }
+
+            lines.push('');
+            lines.push(`— ${waSent} ${hotelName}`);
+
+            const text = encodeURIComponent(lines.join('\n').trim());
+            window.open(`https://wa.me/${wa}?text=${text}`, '_blank', 'noopener');
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

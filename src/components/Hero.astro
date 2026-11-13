@@ -1,0 +1,52 @@
+---
+import Photo from './Photo.astro';
+import Icon from './Icon.astro';
+import { hotels } from '../data/hotel';
+import { ui } from '../data/ui';
+import { localeFromPath } from '../lib/i18n';
+
+const locale = localeFromPath(Astro.url.pathname);
+const hotel = hotels[locale];
+const copy = ui[locale];
+---
+
+<section class="hero">
+  <div class="hero__media">
+    <Photo
+      src={hotel.hero.image}
+      alt={hotel.hero.alt}
+      label=""
+      ratio="16 / 9"
+      eager
+      class="photo--cover"
+    />
+  </div>
+  <div class="hero__veil"></div>
+
+  <div class="hero__inner">
+    <p class="eyebrow eyebrow--light">{hotel.hero.eyebrow}</p>
+    <h1>
+      {hotel.hero.titleLead} <em>{hotel.hero.titleEm}</em> {hotel.hero.titleTail}
+    </h1>
+    <p class="hero__sub">{hotel.description}</p>
+
+    <div class="hero__actions">
+      <a class="btn btn--primary" href="#reservar">
+        {copy.cta.checkAvailability}
+        <Icon name="arrow-right" />
+      </a>
+      <a class="btn btn--light" href="#habitaciones">{copy.cta.viewRooms}</a>
+    </div>
+
+    <ul class="hero__facts">
+      {
+        hotel.hero.facts.map((fact) => (
+          <li>
+            <Icon name={fact.icon} />
+            {fact.text}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

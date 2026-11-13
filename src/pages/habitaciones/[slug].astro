@@ -1,0 +1,19 @@
+---
+import RoomPage from '../../views/RoomPage.astro';
+import { hotels, type Room } from '../../data/hotel';
+
+export function getStaticPaths() {
+  return hotels.es.rooms.map((room) => ({
+    params: { slug: room.slug },
+    props: { room },
+  }));
+}
+
+interface Props {
+  room: Room;
+}
+
+const { room } = Astro.props;
+---
+
+<RoomPage room={room} />

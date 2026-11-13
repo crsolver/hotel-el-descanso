@@ -1,0 +1,49 @@
+---
+import Photo from './Photo.astro';
+import Icon from './Icon.astro';
+import type { Room } from '../data/hotel';
+import { hotels } from '../data/hotel';
+import { ui } from '../data/ui';
+import { localeFromPath, routes } from '../lib/i18n';
+
+interface Props {
+  room: Room;
+}
+
+const { room } = Astro.props;
+const locale = localeFromPath(Astro.url.pathname);
+const hotel = hotels[locale];
+const copy = ui[locale];
+---
+
+<a class="room-card" href={routes[locale].room(room.slug)}>
+  <Photo src={room.image} alt={room.imageAlt} label={room.name} ratio="4 / 3" />
+
+  <div class="room-card__body">
+    <span class="room-card__tagline">{room.tagline}</span>
+    <h3>{room.name}</h3>
+
+    <ul class="room-card__meta">
+      <li><Icon name="users" /> {copy.occupancy(room.capacity)}</li>
+      <li><Icon name="bed" /> {room.beds}</li>
+      <li><Icon name="size" /> {room.size}</li>
+    </ul>
+
+    <p class="room-card__desc">{room.description}</p>
+
+    <div class="room-card__foot">
+      <p class="price">
+        <span class="price__from">{copy.labels.from}</span>
+        <span class="price__value">
+          <span class="price__cur">{hotel.currency}</span>
+          {room.price}
+          <span class="price__night">{copy.labels.perNight}</span>
+        </span>
+      </p>
+      <span class="link-arrow">
+        {copy.cta.viewDetail}
+        <Icon name="arrow-right" />
+      </span>
+    </div>
+  </div>
+</a>

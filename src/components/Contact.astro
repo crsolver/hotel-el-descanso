@@ -1,0 +1,143 @@
+---
+import Icon from './Icon.astro';
+import { hotels } from '../data/hotel';
+import { ui } from '../data/ui';
+import { localeFromPath } from '../lib/i18n';
+
+const locale = localeFromPath(Astro.url.pathname);
+const hotel = hotels[locale];
+const copy = ui[locale];
+const section = hotel.sections.contact;
+
+const waMessage = encodeURIComponent(copy.waIntro);
+---
+
+<section class="section section--dark" id="reservar">
+  <div class="wrap contact">
+    <div>
+      <p class="eyebrow eyebrow--light">{section.eyebrow}</p>
+      <h2 style="font-size:clamp(2.1rem,4vw,3.2rem);margin-top:.9rem">{section.title}</h2>
+      <p class="lede" style="color:rgba(253,250,244,.72);margin-top:1rem;max-width:34rem">
+        {section.text}
+      </p>
+
+      <div class="contact__channels">
+        <a
+          class="channel"
+          href={`https://wa.me/${hotel.contact.whatsapp}?text=${waMessage}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="channel__icon"><Icon name="whatsapp" /></span>
+          <span>
+            <span class="channel__label">{copy.channels.whatsapp}</span>
+            <span class="channel__value">{copy.channels.fastest}</span>
+          </span>
+        </a>
+
+        <a class="channel" href={`tel:${hotel.contact.phoneHref}`}>
+          <span class="channel__icon"><Icon name="phone" /></span>
+          <span>
+            <span class="channel__label">{copy.channels.phone}</span>
+            <span class="channel__value">{hotel.contact.phone}</span>
+          </span>
+        </a>
+
+        <a class="channel" href={`mailto:${hotel.contact.email}`}>
+          <span class="channel__icon"><Icon name="mail" /></span>
+          <span>
+            <span class="channel__label">{copy.channels.email}</span>
+            <span class="channel__value">{hotel.contact.email}</span>
+          </span>
+        </a>
+
+        <div class="channel">
+          <span class="channel__icon"><Icon name="pin" /></span>
+          <span>
+            <span class="channel__label">{copy.channels.address}</span>
+            <span class="channel__value">{hotel.contact.address}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <form
+      class="booking-form"
+      data-wa-form
+      data-wa={hotel.contact.whatsapp}
+      data-hotel={hotel.name}
+      data-intro={copy.waReserveIntro}
+    >
+      <h3>{section.formTitle}</h3>
+      <p>{section.formText}</p>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="c-nombre">{copy.labels.name}</label>
+          <input
+            id="c-nombre"
+            name="nombre"
+            type="text"
+            autocomplete="name"
+            placeholder={copy.form.namePlaceholder}
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="c-contacto">{copy.labels.contact}</label>
+          <input
+            id="c-contacto"
+            name="contacto"
+            type="text"
+            autocomplete="tel"
+            placeholder={copy.form.contactPlaceholder}
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="c-llegada">{copy.labels.arrival}</label>
+          <input id="c-llegada" name="llegada" type="date" required />
+        </div>
+
+        <div class="field">
+          <label for="c-salida">{copy.labels.departure}</label>
+          <input id="c-salida" name="salida" type="date" required />
+        </div>
+
+        <div class="field">
+          <label for="c-huespedes">{copy.labels.guests}</label>
+          <select id="c-huespedes" name="huespedes">
+            {
+              copy.form.guests.map((label, index) => (
+                <option value={index + 1} selected={index === 1}>
+                  {label}
+                </option>
+              ))
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="c-habitacion">{copy.labels.room}</label>
+          <select id="c-habitacion" name="habitacion">
+            <option value="">{copy.form.anyRoom}</option>
+            {hotel.rooms.map((room) => <option value={room.name}>{room.name}</option>)}
+          </select>
+        </div>
+
+        <div class="field field--full">
+          <label for="c-mensaje">{copy.labels.message}</label>
+          <textarea id="c-mensaje" name="mensaje" placeholder={copy.form.messagePlaceholder}></textarea>
+        </div>
+      </div>
+
+      <button class="btn btn--primary btn--block" type="submit">
+        <Icon name="whatsapp" />
+        {copy.cta.sendWhatsapp}
+      </button>
+      <p class="form-note">{copy.form.notePayment}</p>
+    </form>
+  </div>
+</section>

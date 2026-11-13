@@ -1,0 +1,27 @@
+FOTOS DEL HOTEL DE MONTAÑA EL DESCANSO
+======================================
+
+Las fotos vienen de la galería pública del hotel (HotelPlanner / proveedor de
+contenido) y son de baja resolución: 720 x 480. Sirven para la demo, pero hay
+que pedir los originales antes de publicar.
+
+Archivos:
+  jardin-hero.jpg               Casa y jardín (hero)
+  montana.jpg                   Vista del valle y las montañas
+  atardecer.jpg                 Atardecer sobre el Chirripó
+  restaurante.jpg               Comedor
+  terraza.jpg                   Terraza
+  fachada.jpg                   Exterior y balcones
+  entrada.jpg                   Entrada con bancas
+  sendero.jpg                   Caminantes en el sendero
+  catarata.jpg                  Catarata de la zona
+  postre.jpg                    Postre del restaurante
+  habitacion-matrimonial.jpg    Habitación con cama doble
+  habitacion-doble.jpg          Habitación con dos camas
+  habitacion-individual.jpg     Habitación individual
+
+PENDIENTE:
+1. Confirmar que el hotel autoriza el uso de estas fotos.
+2. Pedir originales de al menos 2000 px de ancho y el logo.
+3. Faltan: fachada completa, sauna, baño compartido y habitaciones vacías.
+4. Guardar con el mismo nombre o actualizar `image` en src/data/hotel.ts.

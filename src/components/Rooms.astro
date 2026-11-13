@@ -1,0 +1,32 @@
+---
+import RoomCard from './RoomCard.astro';
+import Icon from './Icon.astro';
+import { hotels } from '../data/hotel';
+import { ui } from '../data/ui';
+import { localeFromPath, routes } from '../lib/i18n';
+
+const locale = localeFromPath(Astro.url.pathname);
+const hotel = hotels[locale];
+const copy = ui[locale];
+const section = hotel.sections.rooms;
+---
+
+<section class="section section--sand" id="habitaciones">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-head__text">
+        <p class="eyebrow">{section.eyebrow}</p>
+        <h2>{section.title}</h2>
+        <p>{section.text}</p>
+      </div>
+      <a class="link-arrow" href={routes[locale].rooms}>
+        {copy.cta.viewAll}
+        <Icon name="arrow-right" />
+      </a>
+    </div>
+
+    <div class:list={['rooms-grid', hotel.rooms.length === 2 && 'rooms-grid--two']}>
+      {hotel.rooms.map((room) => <RoomCard room={room} />)}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,22 @@
+---
+import Icon from './Icon.astro';
+import { hotels } from '../data/hotel';
+import { ui } from '../data/ui';
+import { localeFromPath } from '../lib/i18n';
+
+const locale = localeFromPath(Astro.url.pathname);
+const hotel = hotels[locale];
+const copy = ui[locale];
+const message = encodeURIComponent(copy.waIntro);
+---
+
+<a
+  class="wa-fab"
+  href={`https://wa.me/${hotel.contact.whatsapp}?text=${message}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={copy.aria.whatsapp}
+>
+  <Icon name="whatsapp" />
+  <span>{copy.aria.whatsapp}</span>
+</a>

@@ -1,0 +1,109 @@
+---
+import Icon from './Icon.astro';
+import { hotels } from '../data/hotel';
+import { ui } from '../data/ui';
+import { altPath, localeFromPath, otherLocale, routes } from '../lib/i18n';
+
+interface Props {
+  solid?: boolean;
+}
+
+const { solid = false } = Astro.props;
+const locale = localeFromPath(Astro.url.pathname);
+const hotel = hotels[locale];
+const copy = ui[locale];
+const r = routes[locale];
+const other = otherLocale(locale);
+
+const links = [
+  { label: copy.nav.hotel, href: `${r.home}#hotel` },
+  { label: copy.nav.rooms, href: `${r.home}#habitaciones` },
+  { label: copy.nav.amenities, href: `${r.home}#servicios` },
+  { label: copy.nav.gallery, href: `${r.home}#galeria` },
+  { label: copy.nav.location, href: `${r.home}#ubicacion` },
+];
+
+const esUrl = altPath(Astro.url.pathname, 'es');
+const enUrl = altPath(Astro.url.pathname, 'en');
+---
+
+<header
+  class:list={['site-header', solid && 'is-static is-solid']}
+  data-open="false"
+  data-static={solid ? 'true' : 'false'}
+>
+  <div class="site-header__inner">
+    <a class="brand" href={r.home}>
+      <span class="brand__mark"><Icon name="tour" /></span>
+      <span class="brand__text">
+        <span class="brand__name">{hotel.name}</span>
+        <span class="brand__meta">{copy.brandMeta}</span>
+      </span>
+    </a>
+
+    <nav class="site-nav" aria-label={copy.aria.mainNav}>
+      {links.map((link) => <a href={link.href}>{link.label}</a>)}
+    </nav>
+
+    <div class="lang-switch" role="group" aria-label={copy.aria.language}>
+      {
+        locale === 'es' ? (
+          <span class="is-on" aria-current="true">ES</span>
+        ) : (
+          <a href={esUrl} hreflang="es" lang="es">ES</a>
+        )
+      }
+      <span class="sep" aria-hidden="true">/</span>
+      {
+        locale === 'en' ? (
+          <span class="is-on" aria-current="true">EN</span>
+        ) : (
+          <a href={enUrl} hreflang="en" lang="en">EN</a>
+        )
+      }
+    </div>
+
+    <a class="header-cta" href={`${r.home}#reservar`}>
+      {copy.cta.book}
+      <Icon name="arrow-right" />
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav">
+      <span class="sr-only">{copy.aria.openMenu}</span>
+      <Icon name="menu" class="icon-menu" />
+      <Icon name="close" class="icon-close" />
+    </button>
+  </div>
+</header>
+
+<div class="mobile-nav" id="mobile-nav">
+  <ul>
+    {
+      links.map((link, index) => (
+        <li>
+          <a href={link.href}>
+            {link.label}
+            <span>{String(index + 1).padStart(2, '0')}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <a class="btn btn--primary btn--block" href={`${r.home}#reservar`}>
+    {copy.cta.checkAvailability}
+    <Icon name="arrow-right" />
+  </a>
+  <a class="btn btn--outline btn--block" href={`tel:${hotel.contact.phoneHref}`} style="margin-top:.6rem">
+    <Icon name="phone" />
+    {hotel.contact.phone}
+  </a>
+  <a
+    class="btn btn--outline btn--block"
+    href={other === 'en' ? enUrl : esUrl}
+    hreflang={other}
+    lang={other}
+    style="margin-top:.6rem"
+  >
+    {ui[other].langName}
+  </a>
+</div>

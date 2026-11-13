@@ -1,0 +1,70 @@
+---
+import Photo from './Photo.astro';
+import { hotels } from '../data/hotel';
+import { ui } from '../data/ui';
+import { localeFromPath } from '../lib/i18n';
+
+const locale = localeFromPath(Astro.url.pathname);
+const hotel = hotels[locale];
+const copy = ui[locale];
+const section = hotel.sections.gallery;
+---
+
+<section class="section section--sand" id="galeria">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-head__text">
+        <p class="eyebrow">{section.eyebrow}</p>
+        <h2>{section.title}</h2>
+        <p>{section.text}</p>
+      </div>
+    </div>
+
+    <div class="gallery">
+      {
+        hotel.gallery.map((item) => (
+          <button
+            class="gallery__item"
+            type="button"
+            data-caption={item.caption}
+            aria-label={`${copy.aria.zoom}: ${item.caption}`}
+          >
+            <Photo src={item.image} alt={item.alt} label="" tone={item.tone} ratio="1 / 1" />
+            <span class="gallery__cap">{item.caption}</span>
+          </button>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<dialog class="lightbox" id="lightbox" aria-label={section.title}>
+  <button class="lightbox__close" type="button" aria-label="✕">✕</button>
+  <div class="lightbox__body"></div>
+  <p class="lightbox__cap"></p>
+</dialog>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const dialog = document.getElementById('lightbox');
+    if (!dialog) return;
+    const body = dialog.querySelector('.lightbox__body');
+    const caption = dialog.querySelector('.lightbox__cap');
+    const close = dialog.querySelector('.lightbox__close');
+
+    document.querySelectorAll('.gallery__item').forEach((item) => {
+      item.addEventListener('click', () => {
+        const photo = item.querySelector('[data-photo]');
+        if (!photo || !body) return;
+        body.innerHTML = photo.outerHTML;
+        if (caption) caption.textContent = item.dataset.caption || '';
+        dialog.showModal();
+      });
+    });
+
+    close?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  });
+</script>

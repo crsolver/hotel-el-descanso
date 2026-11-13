@@ -1,0 +1,35 @@
+---
+import Icon from './Icon.astro';
+import { hotels } from '../data/hotel';
+import { localeFromPath } from '../lib/i18n';
+
+const locale = localeFromPath(Astro.url.pathname);
+const hotel = hotels[locale];
+const section = hotel.sections.amenities;
+---
+
+<section class="section" id="servicios">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-head__text">
+        <p class="eyebrow">{section.eyebrow}</p>
+        <h2>{section.title}</h2>
+        <p>{section.text}</p>
+      </div>
+    </div>
+
+    <div class="amenities">
+      {
+        hotel.amenities.map((amenity) => (
+          <article class="amenity">
+            <div class="amenity__icon">
+              <Icon name={amenity.icon} />
+            </div>
+            <h3>{amenity.title}</h3>
+            <p>{amenity.text}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

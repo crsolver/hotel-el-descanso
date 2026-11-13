@@ -1,0 +1,57 @@
+---
+import Icon from './Icon.astro';
+import { hotels } from '../data/hotel';
+import { ui } from '../data/ui';
+import { localeFromPath } from '../lib/i18n';
+
+const locale = localeFromPath(Astro.url.pathname);
+const hotel = hotels[locale];
+const copy = ui[locale];
+---
+
+<section class="section" id="hotel">
+  <div class="wrap intro">
+    <div>
+      <p class="eyebrow">{hotel.intro.eyebrow}</p>
+      <h2>{hotel.intro.title}</h2>
+      <div class="intro__body">
+        {hotel.intro.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+    </div>
+
+    <aside class="fact-card">
+      <dl>
+        <div class="fact-card__row">
+          <dt>{copy.labels.roomsFrom}</dt>
+          <dd>
+            {hotel.currency} {hotel.priceFrom}
+            <span style="font-weight:400;color:var(--ink-3)">{copy.labels.perNight}</span>
+          </dd>
+        </div>
+        <div class="fact-card__row">
+          <dt>{copy.labels.checkIn}</dt>
+          <dd>{hotel.checkIn}</dd>
+        </div>
+        <div class="fact-card__row">
+          <dt>{copy.labels.checkOut}</dt>
+          <dd>{hotel.checkOut}</dd>
+        </div>
+        <div class="fact-card__row">
+          <dt>{copy.labels.location}</dt>
+          <dd>San Isidro de El General</dd>
+        </div>
+      </dl>
+
+      <ul class="fact-card__list">
+        {
+          hotel.intro.highlights.map((item) => (
+            <li>
+              <Icon name="check" />
+              {item}
+            </li>
+          ))
+        }
+      </ul>
+    </aside>
+  </div>
+</section>

@@ -1,0 +1,131 @@
+---
+import Base from '../layouts/Base.astro';
+import Photo from '../components/Photo.astro';
+import Contact from '../components/Contact.astro';
+import Icon from '../components/Icon.astro';
+import { hotels, type Room } from '../data/hotel';
+import { ui } from '../data/ui';
+import { localeFromPath, routes } from '../lib/i18n';
+
+interface Props {
+  room: Room;
+}
+
+const { room } = Astro.props;
+const locale = localeFromPath(Astro.url.pathname);
+const hotel = hotels[locale];
+const copy = ui[locale];
+
+const message = encodeURIComponent(copy.waRoomIntro(room.name));
+
+const roomSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'HotelRoom',
+  name: room.name,
+  description: room.description,
+  inLanguage: locale,
+  occupancy: {
+    '@type': 'QuantitativeValue',
+    maxValue: room.capacity,
+  },
+  bed: room.beds,
+  offers: {
+    '@type': 'Offer',
+    price: room.price,
+    priceCurrency: hotel.currency,
+    availability: 'https://schema.org/InStock',
+    url: new URL(routes[locale].room(room.slug), Astro.site).toString(),
+  },
+};
+---
+
+<Base
+  title={room.name}
+  description={`${room.name} · ${hotel.name}. ${copy.labels.from} ${hotel.currency} ${room.price} ${copy.labels.perNight}.`}
+  solidHeader
+  jsonLd={roomSchema}
+>
+  <section class="page-hero">
+    <div class="wrap">
+      <a class="back-link" href={routes[locale].rooms}>
+        <Icon name="arrow-left" />
+        {copy.cta.allRooms}
+      </a>
+      <p class="eyebrow">{room.tagline}</p>
+      <h1>{room.name}</h1>
+      <p>{room.description}</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap room-detail">
+      <div>
+        <Photo src={room.image} alt={room.imageAlt} label={room.name} ratio="4 / 3" eager />
+
+        <div style="margin-top:2rem">
+          <p class="eyebrow">{copy.roomDetail.included}</p>
+          <h2 style="font-size:clamp(1.6rem,2.6vw,2.1rem);margin-top:.7rem">
+            {copy.roomDetail.heading}
+          </h2>
+          <p class="lede" style="margin-top:1rem;max-width:38rem">{room.description}</p>
+
+          <ul class="spec-list" style="margin-top:1.5rem">
+            {
+              room.features.map((feature) => (
+                <li>
+                  <Icon name="check" />
+                  {feature}
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+
+      <aside class="room-detail__aside">
+        <p class="price">
+          <span class="price__from">{copy.labels.from}</span>
+          <span class="price__value">
+            <span class="price__cur">{hotel.currency}</span>
+            {room.price}
+            <span class="price__night">{copy.labels.perNight}</span>
+          </span>
+        </p>
+
+        <ul class="spec-list">
+          <li><Icon name="users" /> {copy.roomDetail.upTo(room.capacity)}</li>
+          <li><Icon name="bed" /> {room.beds}</li>
+          <li><Icon name="size" /> {room.size}</li>
+          <li>
+            <Icon name="clock" />
+            {copy.labels.checkIn} {hotel.checkIn} · {copy.labels.checkOut} {hotel.checkOut}
+          </li>
+          <li><Icon name="coffee" /> {copy.labels.breakfastIncluded}</li>
+        </ul>
+
+        <a
+          class="btn btn--primary btn--block"
+          href={`https://wa.me/${hotel.contact.whatsapp}?text=${message}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Icon name="whatsapp" />
+          {copy.cta.consultRoom}
+        </a>
+
+        <a
+          class="btn btn--outline btn--block"
+          href={`tel:${hotel.contact.phoneHref}`}
+          style="margin-top:.6rem"
+        >
+          <Icon name="phone" />
+          {hotel.contact.phone}
+        </a>
+
+        <p class="form-note">{copy.roomDetail.noPayment}</p>
+      </aside>
+    </div>
+  </section>
+
+  <Contact />
+</Base>

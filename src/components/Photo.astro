@@ -1,0 +1,48 @@
+---
+/**
+ * Foto con marcador de posición.
+ * Si `src` es null, se dibuja un bloque de marca con la etiqueta.
+ * Cuando el hotel entregue fotos: guardarlas en /public/img y usar src="/img/nombre.jpg".
+ */
+interface Props {
+  src?: string | null;
+  alt: string;
+  label?: string;
+  tone?: number;
+  ratio?: string;
+  class?: string;
+  eager?: boolean;
+}
+
+const {
+  src = null,
+  alt,
+  label = 'Foto del hotel',
+  tone = 1,
+  ratio = '4 / 3',
+  class: className = '',
+  eager = false,
+} = Astro.props;
+---
+
+<figure
+  class:list={['photo', className]}
+  style={`--ratio:${ratio};--tone:${tone}`}
+  data-photo
+>
+  {
+    src ? (
+      <img
+        src={src}
+        alt={alt}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchpriority={eager ? 'high' : 'auto'}
+      />
+    ) : (
+      <div class="photo__ph" role="img" aria-label={alt}>
+        {label && <span class="photo__tag">{label}</span>}
+      </div>
+    )
+  }
+</figure>

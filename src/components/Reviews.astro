@@ -1,0 +1,41 @@
+---
+import Icon from './Icon.astro';
+import { hotels } from '../data/hotel';
+import { ui } from '../data/ui';
+import { localeFromPath } from '../lib/i18n';
+
+const locale = localeFromPath(Astro.url.pathname);
+const hotel = hotels[locale];
+const copy = ui[locale];
+const section = hotel.sections.reviews;
+---
+
+<section class="section section--sand">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-head__text">
+        <p class="eyebrow">{section.eyebrow}</p>
+        <h2>{section.title}</h2>
+      </div>
+    </div>
+
+    <div class="reviews">
+      {
+        hotel.reviews.map((review) => (
+          <article class="review">
+            <div class="review__stars" role="img" aria-label={copy.reviewStars(review.rating)}>
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Icon name="star" class={index < review.rating ? '' : 'is-off'} />
+              ))}
+            </div>
+            <blockquote>“{review.text}”</blockquote>
+            <div class="review__who">
+              <strong>{review.name}</strong>
+              {review.origin} · {review.source}, {review.date}
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,63 @@
+---
+import Icon from './Icon.astro';
+import { hotels } from '../data/hotel';
+import { ui } from '../data/ui';
+import { localeFromPath } from '../lib/i18n';
+
+interface Props {
+  /** Preselecciona una habitación (páginas de detalle). */
+  room?: string;
+}
+
+const { room } = Astro.props;
+const locale = localeFromPath(Astro.url.pathname);
+const hotel = hotels[locale];
+const copy = ui[locale];
+---
+
+<div class="booking-wrap">
+  <div class="wrap">
+    <form
+      class="booking-bar"
+      data-wa-form
+      data-wa={hotel.contact.whatsapp}
+      data-hotel={hotel.name}
+      data-intro={copy.waIntro}
+    >
+      <div class="field">
+        <label for="bar-llegada">{copy.labels.arrival}</label>
+        <input id="bar-llegada" name="llegada" type="date" required />
+      </div>
+
+      <div class="field">
+        <label for="bar-salida">{copy.labels.departure}</label>
+        <input id="bar-salida" name="salida" type="date" required />
+      </div>
+
+      <div class="field">
+        <label for="bar-huespedes">{copy.labels.guests}</label>
+        <select id="bar-huespedes" name="huespedes">
+          {
+            copy.form.guests.map((label, index) => (
+              <option value={index + 1} selected={index === 1}>
+                {label}
+              </option>
+            ))
+          }
+        </select>
+      </div>
+
+      <button class="btn btn--primary" type="submit">
+        {copy.cta.check}
+        <Icon name="arrow-right" />
+      </button>
+
+      {room && <input type="hidden" name="habitacion" value={hotel.rooms.find((r) => r.slug === room)?.name} />}
+
+      <p class="booking-bar__note">
+        <Icon name="check" />
+        {copy.form.noteBar}
+      </p>
+    </form>
+  </div>
+</div>

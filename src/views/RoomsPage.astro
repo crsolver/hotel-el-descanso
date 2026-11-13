@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+import RoomCard from '../components/RoomCard.astro';
+import Contact from '../components/Contact.astro';
+import Icon from '../components/Icon.astro';
+import { hotels } from '../data/hotel';
+import { ui } from '../data/ui';
+import { localeFromPath, routes } from '../lib/i18n';
+
+const locale = localeFromPath(Astro.url.pathname);
+const hotel = hotels[locale];
+const copy = ui[locale];
+const page = hotel.pages.rooms;
+---
+
+<Base title={page.eyebrow} description={page.description} solidHeader>
+  <section class="page-hero">
+    <div class="wrap">
+      <a class="back-link" href={routes[locale].home}>
+        <Icon name="arrow-left" />
+        {copy.cta.backHome}
+      </a>
+      <p class="eyebrow">{page.eyebrow}</p>
+      <h1>{page.title}</h1>
+      <p>{page.text}</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class:list={['rooms-grid', hotel.rooms.length === 2 && 'rooms-grid--two']}>
+        {hotel.rooms.map((room) => <RoomCard room={room} />)}
+      </div>
+    </div>
+  </section>
+
+  <Contact />
+</Base>
